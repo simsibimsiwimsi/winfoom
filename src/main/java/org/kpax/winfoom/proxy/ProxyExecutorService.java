@@ -13,6 +13,7 @@
 package org.kpax.winfoom.proxy;
 
 import lombok.extern.slf4j.Slf4j;
+import org.kpax.winfoom.annotation.NotNull;
 import org.kpax.winfoom.proxy.listener.StopListener;
 import org.kpax.winfoom.util.functional.SingletonSupplier;
 import org.springframework.core.annotation.Order;
@@ -94,6 +95,11 @@ public class ProxyExecutorService implements ExecutorService, StopListener {
         return threadPoolSupplier.get().invokeAny(tasks, timeout, unit);
     }
 
+    @Override
+    public void close() {
+        StopListener.super.close();
+    }
+
     public boolean isShutdown() {
         return threadPoolSupplier.hasValue() && threadPoolSupplier.get().isShutdown();
     }
@@ -115,9 +121,7 @@ public class ProxyExecutorService implements ExecutorService, StopListener {
         private final String namePrefix;
 
         public DefaultThreadFactory() {
-            SecurityManager securityManager = System.getSecurityManager();
-            group = (securityManager != null) ? securityManager.getThreadGroup() :
-                    Thread.currentThread().getThreadGroup();
+            group = Thread.currentThread().getThreadGroup();
             namePrefix = "pool-" +
                     poolNumber.getAndIncrement() +
                     "-thread-";
