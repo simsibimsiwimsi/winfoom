@@ -12,8 +12,10 @@
 
 package org.kpax.winfoom.proxy;
 
+import inet.ipaddr.IPAddressString;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.kpax.winfoom.annotation.ThreadSafe;
 import org.kpax.winfoom.config.ProxyConfig;
 import org.kpax.winfoom.config.SystemConfig;
@@ -68,8 +70,12 @@ class LocalProxyServer implements StopListener {
         log.info("Start local proxy server with userConfig {}", proxyConfig);
         try {
             final ClientConnectionHandler clientConnectionHandler = clientConnectionHandlerSelector.select();
-            serverSocket = new ServerSocket(proxyConfig.getLocalPort(),
-                    systemConfig.getServerSocketBacklog());
+
+            serverSocket = StringUtils.isBlank(proxyConfig.getLocalHost()) ?
+                    new ServerSocket(proxyConfig.getLocalPort(), systemConfig.getServerSocketBacklog()) :
+                    new ServerSocket(proxyConfig.getLocalPort(), systemConfig.getServerSocketBacklog(),
+                            new IPAddressString(proxyConfig.getLocalHost()).getAddress().toInetAddress());
+
             executorService.submit(() -> {
                 while (true) {
                     try {

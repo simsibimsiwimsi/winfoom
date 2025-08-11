@@ -57,7 +57,7 @@ import java.util.Properties;
 @ToString(doNotUseGetters = true)
 @Slf4j
 @JsonPropertyOrder({"proxyType", "proxyHost", "proxyPort", "proxyUsername", "proxyPassword", "proxyStorePassword",
-        "proxyPacFileLocation", "blacklistTimeout",
+        "proxyPacFileLocation", "blacklistTimeout", "localHost",
         "localPort", "proxyTestUrl", "autostart", "autodetect"})
 @Component
 @PropertySource(value = "file:./config/proxy.properties", ignoreResourceNotFound = true)
@@ -81,6 +81,9 @@ public class ProxyConfig {
 
     @Value("${local.port:3129}")
     private Integer localPort;
+
+    @Value("${local.host:}")
+    private String localHost;
 
     @Value("${proxy.http.host:}")
     private String proxyHttpHost;
@@ -281,9 +284,16 @@ public class ProxyConfig {
     }
 
     @JsonView(value = {Views.Common.class})
+    public String getLocalHost() {
+        return localHost;
+    }
+
+    @JsonView(value = {Views.Common.class})
     public Integer getLocalPort() {
         return localPort;
     }
+
+    public void setLocalHost(String localHost) { this.localHost = localHost; }
 
     public void setLocalPort(Integer localPort) {
         this.localPort = localPort;
@@ -590,6 +600,7 @@ public class ProxyConfig {
         setProperty(config, "proxy.socks4.port", proxySocks4Port);
         setProperty(config, "proxy.socks5.host", proxySocks5Host);
         setProperty(config, "proxy.socks5.port", proxySocks5Port);
+        setProperty(config, "local.host", localHost);
         setProperty(config, "local.port", localPort);
         setProperty(config, "proxy.test.url", proxyTestUrl);
         setProperty(config, "proxy.http.username", proxyHttpUsername);
