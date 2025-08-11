@@ -36,6 +36,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.Serial;
 import java.util.Objects;
 
 @RequiredArgsConstructor
@@ -43,6 +44,7 @@ import java.util.Objects;
 @Profile("gui")
 @Component
 public class AppFrame extends JFrame {
+    @Serial
     private static final long serialVersionUID = 4009799697210970761L;
 
     private static final int ICON_SIZE = 16;
@@ -62,6 +64,7 @@ public class AppFrame extends JFrame {
     private JLabel proxyTypeLabel;
     private JComboBox<ProxyConfig.Type> proxyTypeCombo;
 
+    private JTextField localHostJTextField;
     private JSpinner localPortJSpinner;
 
     private JButton btnStart;
@@ -212,6 +215,10 @@ public class AppFrame extends JFrame {
         return new JLabel("Local proxy port* ");
     }
 
+    private JLabel getLocalHostLabel() {
+        return new JLabel("Local proxy host* ");
+    }
+
     private JLabel getUseSystemCredentialsLabel() {
         return new JLabel("Use system credentials");
     }
@@ -323,6 +330,15 @@ public class AppFrame extends JFrame {
             localPortJSpinner.addChangeListener(e -> proxyConfig.setLocalPort((Integer) localPortJSpinner.getValue()));
         }
         return localPortJSpinner;
+    }
+
+    private JTextField getLocalHostJTextField() {
+        if (localHostJTextField == null) {
+            localHostJTextField = createTextField(proxyConfig.getLocalHost());
+            localHostJTextField.setToolTipText("The address Winfoom will listen on, i.e. 127.0.0.1 or 0.0.0.0 (which exposes your proxy to others!)");
+            localHostJTextField.getDocument().addDocumentListener((TextChangeListener) (e) -> proxyConfig.setLocalHost(localHostJTextField.getText()));
+        }
+        return localHostJTextField;
     }
 
     private JTextField getSocks5UsernameJTextField() {// FIXME Use getUsernameJTextField
@@ -555,11 +571,13 @@ public class AppFrame extends JFrame {
     private void configureForHttp() {
         labelPanel.add(getProxyHostLabel());
         labelPanel.add(getProxyPortLabel());
+        labelPanel.add(getLocalHostLabel());
         labelPanel.add(getLocalPortLabel());
         labelPanel.add(getUseSystemCredentialsLabel());
 
         fieldPanel.add(getProxyHostJTextField());
         fieldPanel.add(wrapToPanel(getProxyPortJSpinner()));
+        fieldPanel.add(wrapToPanel(getLocalHostJTextField()));
         fieldPanel.add(wrapToPanel(getLocalPortJSpinner()));
         fieldPanel.add(getUseSystemCredentialsJCheckBox());
 
@@ -577,16 +595,19 @@ public class AppFrame extends JFrame {
     private void configureForSocks4() {
         labelPanel.add(getProxyHostLabel());
         labelPanel.add(getProxyPortLabel());
+        labelPanel.add(getLocalHostLabel());
         labelPanel.add(getLocalPortLabel());
 
         fieldPanel.add(getProxyHostJTextField());
         fieldPanel.add(wrapToPanel(getProxyPortJSpinner()));
+        fieldPanel.add(wrapToPanel(getLocalHostJTextField()));
         fieldPanel.add(wrapToPanel(getLocalPortJSpinner()));
     }
 
     private void configureForPac() {
         labelPanel.add(getPacFileLabel());
         labelPanel.add(getBlacklistTimeoutLabel());
+        labelPanel.add(getLocalHostLabel());
         labelPanel.add(getLocalPortLabel());
         labelPanel.add(getUsernameLabel(false));
         labelPanel.add(getPasswordLabel(false));
@@ -595,6 +616,7 @@ public class AppFrame extends JFrame {
         fieldPanel.add(getPacFileJTextField());
         fieldPanel.add(wrapToPanel(getBlacklistTimeoutJSpinner(),
                 new JLabel(" (" + ProxyBlacklist.TEMPORAL_UNIT.toString().toLowerCase() + ")")));
+        fieldPanel.add(wrapToPanel(getLocalHostJTextField()));
         fieldPanel.add(wrapToPanel(getLocalPortJSpinner()));
 
         fieldPanel.add(getPacUsernameTextField());
@@ -607,7 +629,9 @@ public class AppFrame extends JFrame {
 
 
     private void configureForDirect() {
+        labelPanel.add(getLocalHostLabel());
         labelPanel.add(getLocalPortLabel());
+        fieldPanel.add(wrapToPanel(getLocalHostJTextField()));
         fieldPanel.add(wrapToPanel(getLocalPortJSpinner()));
     }
 
@@ -616,12 +640,14 @@ public class AppFrame extends JFrame {
         labelPanel.add(getProxyPortLabel());
         labelPanel.add(getUsernameLabel(false));
         labelPanel.add(getPasswordLabel(false));
+        labelPanel.add(getLocalHostLabel());
         labelPanel.add(getLocalPortLabel());
 
         fieldPanel.add(getProxyHostJTextField());
         fieldPanel.add(wrapToPanel(getProxyPortJSpinner()));
         fieldPanel.add(getSocks5UsernameJTextField());
         fieldPanel.add(getSocks5PasswordField());
+        fieldPanel.add(wrapToPanel(getLocalHostJTextField()));
         fieldPanel.add(wrapToPanel(getLocalPortJSpinner()));
     }
 
