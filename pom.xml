@@ -23,10 +23,10 @@
     </parent>
     <groupId>org.kpax</groupId>
     <artifactId>winfoom</artifactId>
-    <version>4.1.0</version>
+    <version>5.0.0</version>
 
     <name>winfoom</name>
-    <url>https://github.com/ecovaci/winfoom</url>
+    <url>https://github.com/simsibimsiwimsi/winfoom</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -189,6 +189,23 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>process-aot</id>
+                        <configuration>
+                            <profiles/>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.graalvm.buildtools</groupId>
+                <artifactId>native-maven-plugin</artifactId>
+                <configuration>
+                    <buildArgs>
+                        <arg>--initialize-at-build-time=ch.qos.logback,org.slf4j</arg>
+                    </buildArgs>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

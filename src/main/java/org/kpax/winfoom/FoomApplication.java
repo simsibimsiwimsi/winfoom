@@ -63,17 +63,6 @@ public class FoomApplication {
         }
 
         log.info("Bootstrap Spring's application context");
-        try {
-            SpringApplication.run(FoomApplication.class, args);
-        } catch (Exception e) {
-            log.error("Error on bootstrapping Spring's application context", e);
-            if (SystemConfig.IS_GUI_MODE) {
-                SwingUtils.showErrorMessage("Failed to launch the application." +
-                        "<br>Please check the application's log file.");
-            }
-            System.exit(1);
-        }
+        SpringApplication.run(FoomApplication.class, args);
     }
-
-
 }

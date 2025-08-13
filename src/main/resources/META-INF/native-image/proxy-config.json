@@ -1,0 +1,14 @@
+[
+  {
+    "interfaces":["com.sun.jna.platform.win32.Secur32"]
+  },
+  {
+    "interfaces":["java.lang.reflect.ParameterizedType","org.springframework.core.SerializableTypeWrapper$SerializableTypeProxy","java.io.Serializable"]
+  },
+  {
+    "interfaces":["org.apache.commons.configuration2.builder.fluent.FileBasedBuilderParameters"]
+  },
+  {
+    "interfaces":["org.springframework.boot.context.properties.ConfigurationProperties"]
+  }
+]

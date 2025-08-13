@@ -12,23 +12,14 @@
   -->
 
 <configuration>
-    <contextListener class="org.kpax.winfoom.config.LoggerStartupListener"/>
-    <appender name="FILEAPP" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOG_PATH}/winfoom.log</file>
-        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <Pattern>%d{dd-MM-yyyy HH:mm:ss.SSS} [%thread] %-5level %logger{36}.%M - %msg%n</Pattern>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- encoders are assigned the type
+             ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} -%kvp- %msg%n</pattern>
         </encoder>
-        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
-            <fileNamePattern>${LOG_PATH}/archived/winfoom_%i.log</fileNamePattern>
-            <minIndex>1</minIndex>
-            <maxIndex>4</maxIndex>
-        </rollingPolicy>
-        <triggeringPolicy
-                class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
-            <maxFileSize>5MB</maxFileSize>
-        </triggeringPolicy>
     </appender>
     <root level="info">
-        <appender-ref ref="FILEAPP" />
+        <appender-ref ref="STDOUT" />
     </root>
 </configuration>
