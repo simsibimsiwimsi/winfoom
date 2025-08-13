@@ -76,6 +76,8 @@ class LocalProxyServer implements StopListener {
                     new ServerSocket(proxyConfig.getLocalPort(), systemConfig.getServerSocketBacklog(),
                             new IPAddressString(proxyConfig.getLocalHost()).getAddress().toInetAddress());
 
+            log.info("Server socket with inet address {} and local socket address {}",serverSocket.getInetAddress().toString(), serverSocket.getLocalSocketAddress());
+
             executorService.submit(() -> {
                 while (true) {
                     try {
