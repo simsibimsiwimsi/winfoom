@@ -10,6 +10,10 @@
   ~ distributed under the License is distributed on an "AS IS" BASIS,
   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   ~ See the License for the specific language governing permissions and limitations under the License.
+
+  ~ Changes applied to the original file:
+  ~ - Upgraded external dependencies used
+  ~ - Added configuration to allow for native compilation using graalvm
   -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -18,12 +22,12 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.4</version>
+        <version>3.5.5</version>
         <relativePath/>
     </parent>
     <groupId>org.kpax</groupId>
     <artifactId>winfoom</artifactId>
-    <version>5.0.0</version>
+    <version>5.0.1</version>
 
     <name>winfoom</name>
     <url>https://github.com/simsibimsiwimsi/winfoom</url>

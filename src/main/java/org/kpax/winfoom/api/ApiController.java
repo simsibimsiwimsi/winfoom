@@ -19,16 +19,16 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.auth.Credentials;
+import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.bootstrap.HttpServer;
 import org.apache.http.impl.bootstrap.ServerBootstrap;
 import org.apache.http.message.BasicHttpEntityEnclosingRequest;
 import org.apache.http.protocol.HttpContext;
-import org.kpax.winfoom.api.auth.ApiCredentials;
 import org.kpax.winfoom.api.dto.ConfigDto;
 import org.kpax.winfoom.api.dto.SettingsDto;
 import org.kpax.winfoom.api.json.Views;
@@ -47,6 +47,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -72,10 +73,13 @@ public class ApiController implements AutoCloseable {
 
     private final ConfigurableApplicationContext applicationContext;
 
+
+
+
     @PostConstruct
     private void init() throws IOException {
-        Credentials credentials = new ApiCredentials(proxyConfig.getApiToken());
-        log.info("Register API request handlers");
+        UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(proxyConfig.getApiUser(), StringUtils.isNotBlank(proxyConfig.getProxyPassword()) ? proxyConfig.getProxyPassword() : UUID.randomUUID().toString());
+        log.info("Register API request handlers with credentials: user: {} password: {}", credentials.getUserPrincipal().getName(), credentials.getPassword());
         apiServer = ServerBootstrap.bootstrap().setListenerPort(proxyConfig.getApiPort()).
                 registerHandler("/start",
                         new GenericHttpRequestHandler(credentials, executorService, systemConfig) {
@@ -183,7 +187,7 @@ public class ApiController implements AutoCloseable {
                                 log.debug("'config get' command received");
                                 try {
                                     response.setEntity(new StringEntity(new ObjectMapper().
-                                            configure(MapperFeature.DEFAULT_VIEW_INCLUSION, false).
+                                            disable(MapperFeature.DEFAULT_VIEW_INCLUSION).
                                             writerWithDefaultPrettyPrinter().
                                             withView(Views.getView(proxyConfig)).
                                             writeValueAsString(proxyConfig)));
@@ -206,8 +210,7 @@ public class ApiController implements AutoCloseable {
                                 if (running) {
                                     response.setEntity(new StringEntity("The local proxy server is up, you need to stop it before applying configuration"));
                                 } else {
-                                    if (request instanceof BasicHttpEntityEnclosingRequest) {
-                                        BasicHttpEntityEnclosingRequest entityEnclosingRequest = (BasicHttpEntityEnclosingRequest) request;
+                                    if (request instanceof BasicHttpEntityEnclosingRequest entityEnclosingRequest) {
                                         try {
                                             String json = IOUtils.toString(entityEnclosingRequest.getEntity().getContent(), StandardCharsets.UTF_8);
                                             ConfigDto configDto = new ObjectMapper().readValue(json, ConfigDto.class);
@@ -261,8 +264,7 @@ public class ApiController implements AutoCloseable {
                                 if (running) {
                                     response.setEntity(new StringEntity("The local proxy server is up, you need to stop it before changing settings"));
                                 } else {
-                                    if (request instanceof BasicHttpEntityEnclosingRequest) {
-                                        BasicHttpEntityEnclosingRequest entityEnclosingRequest = (BasicHttpEntityEnclosingRequest) request;
+                                    if (request instanceof BasicHttpEntityEnclosingRequest entityEnclosingRequest) {
                                         try {
                                             String json = IOUtils.toString(entityEnclosingRequest.getEntity().getContent(), StandardCharsets.UTF_8);
                                             SettingsDto settingsDto = new ObjectMapper().readValue(json, SettingsDto.class);

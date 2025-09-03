@@ -452,7 +452,7 @@ public class AppFrame extends JFrame {
             btnCancelBlacklist.setMargin(new Insets(2, 6, 2, 6));
             btnCancelBlacklist.addActionListener(e -> {
                 int clearCount = proxyBlacklist.clear();
-                SwingUtils.showInfoMessage(this, String.format("Found: %d blacklisted proxies!", clearCount));
+                SwingUtils.showInfoMessage(this, String.format("Found: %d blacklisted proxies!", (Integer)clearCount));
             });
             btnCancelBlacklist.setIcon(new TunedImageIcon("clear-blacklist.png"));
             btnCancelBlacklist.setVisible(false);

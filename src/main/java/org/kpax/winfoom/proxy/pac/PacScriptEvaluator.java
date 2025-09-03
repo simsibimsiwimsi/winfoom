@@ -61,6 +61,7 @@ import javax.script.ScriptException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -135,7 +136,7 @@ public class PacScriptEvaluator implements ProxyListener {
                     return new GenericObjectPool<GraalJSScriptEngine>(
                             new BasePooledObjectFactory<>() {
                                 @Override
-                                public GraalJSScriptEngine create() throws PacFileException, IOException {
+                                public GraalJSScriptEngine create() throws PacFileException, IOException, URISyntaxException {
                                     return createScriptEngine();
                                 }
 
@@ -184,7 +185,7 @@ public class PacScriptEvaluator implements ProxyListener {
      * @return the {@link PacScriptEvaluator} instance.
      * @throws IOException
      */
-    private String loadScript() throws IOException {
+    private String loadScript() throws IOException, URISyntaxException {
         URL url = proxyConfig.getProxyPacFileLocationAsURL();
         Assert.state(url != null, "No proxy PAC file location found");
         log.info("Get PAC file from: {}", url);
@@ -195,7 +196,7 @@ public class PacScriptEvaluator implements ProxyListener {
         }
     }
 
-    private GraalJSScriptEngine createScriptEngine() throws PacFileException, IOException {
+    private GraalJSScriptEngine createScriptEngine() throws PacFileException, IOException, URISyntaxException {
         String pacSource = loadScript();
         try {
             GraalJSScriptEngine scriptEngine = GraalJSScriptEngine.create(engineSingletonSupplier.get(),
@@ -288,5 +289,4 @@ public class PacScriptEvaluator implements ProxyListener {
         enginePoolSingletonSupplier.reset();
         jsMainFunction = null;
     }
-
 }

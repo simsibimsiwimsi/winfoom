@@ -9,28 +9,33 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and limitations under the License.
  *
+ * Changes applied to this file:
+ * - exchanged basic auth verification
+ * - generating API basic auth credentials if none are configured
+ *
  */
 
 package org.kpax.winfoom.api;
 
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.auth.AuthenticationException;
-import org.apache.http.auth.Credentials;
+import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.kpax.winfoom.annotation.NotNull;
 import org.kpax.winfoom.config.SystemConfig;
 import org.kpax.winfoom.proxy.ProxyExecutorService;
-import org.kpax.winfoom.util.HttpUtils;
 import org.kpax.winfoom.util.Throwables;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -44,13 +49,13 @@ import java.util.concurrent.TimeoutException;
 @Slf4j
 public class GenericHttpRequestHandler implements HttpRequestHandler {
 
-    private final Credentials credentials;
+    private final UsernamePasswordCredentials credentials;
 
     private final ProxyExecutorService executorService;
 
     private final SystemConfig systemConfig;
 
-    public GenericHttpRequestHandler(@NotNull Credentials credentials, ProxyExecutorService executorService, SystemConfig systemConfig) {
+    public GenericHttpRequestHandler(@NotNull UsernamePasswordCredentials credentials, ProxyExecutorService executorService, SystemConfig systemConfig) {
         this.credentials = credentials;
         this.executorService = executorService;
         this.systemConfig = systemConfig;
@@ -60,7 +65,7 @@ public class GenericHttpRequestHandler implements HttpRequestHandler {
     public void handle(HttpRequest request, HttpResponse response, HttpContext context)
             throws HttpException, IOException {
         log.debug("Received request {}", request);
-        boolean isAuthorized = handleAuthorization(request, response, context);
+        boolean isAuthorized = handleAuthorization(request, response);
         if (isAuthorized) {
             Future<Object> future = executorService.submit(() -> {
                 String method = request.getRequestLine().getMethod().toUpperCase(Locale.ROOT);
@@ -106,21 +111,27 @@ public class GenericHttpRequestHandler implements HttpRequestHandler {
         }
     }
 
-    private boolean handleAuthorization(HttpRequest request, HttpResponse response, HttpContext context) throws UnsupportedEncodingException {
-        boolean isAuthorized = false;
-        try {
-            isAuthorized = HttpUtils.verifyBasicAuth(request, credentials.getUserPrincipal().getName());
-            if (!isAuthorized) {
-                response.setStatusCode(HttpStatus.SC_FORBIDDEN);
-                response.setEntity(new StringEntity("Incorrect user/password"));
-            }
-        } catch (AuthenticationException e) {
-            log.warn("Command authorization error", e);
-            response.setStatusCode(HttpStatus.SC_UNAUTHORIZED);
-            response.setEntity(new StringEntity(e.getMessage()));
+    private boolean handleAuthorization(HttpRequest request, HttpResponse response) throws UnsupportedEncodingException {
+
+        if(!request.containsHeader("Authorization")) {
+            log.debug("API request missing Authorization header");
+            return handleUnauthorized(response);
         }
-        log.debug("Is request authorized? {}", isAuthorized);
-        return isAuthorized;
+        val authorization = request.getFirstHeader("Authorization").getValue();
+        val validHeaderValue = "Basic " + new String(Base64.getEncoder().encode((credentials.getUserName() + ":" + credentials.getPassword()).getBytes(StandardCharsets.UTF_8)));
+        if (validHeaderValue.equals(authorization)) {
+            log.debug("API request authorized");
+            return true;
+        } else {
+            log.debug("API request unauthorized");
+            return handleUnauthorized(response);
+        }
+    }
+
+    private boolean handleUnauthorized(HttpResponse response) throws UnsupportedEncodingException{
+        response.setStatusCode(HttpStatus.SC_FORBIDDEN);
+        response.setEntity(new StringEntity("Incorrect user/password"));
+        return false;
     }
 
     public void doGet(HttpRequest request, HttpResponse response, HttpContext context)
