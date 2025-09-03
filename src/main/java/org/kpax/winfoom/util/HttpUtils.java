@@ -8,6 +8,9 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and limitations under the License.
+ *
+ * Changes applied:
+ * - removed helper method to test basic authentication
  */
 
 package org.kpax.winfoom.util;
@@ -424,7 +427,7 @@ public final class HttpUtils {
      */
     public static Header createViaHeader(@NotNull final ProtocolVersion version, final Header viaHeader) {
         Assert.notNull(version, "version cannot be null");
-        String value = String.format("%s.%s winfoom", version.getMajor(), version.getMinor())
+        String value = String.format("%s.%s winfoom", (Integer)version.getMajor(), (Integer)version.getMinor())
                 + (viaHeader != null ? ", " + viaHeader.getValue() : "");
         return new BasicHeader(HttpHeaders.VIA, value);
     }
@@ -465,33 +468,6 @@ public final class HttpUtils {
      */
     public static boolean containsSchema(@NotNull String uri) {
         return uri.contains("://");
-    }
-
-    /**
-     * Verify whether the {@link HttpRequest} instance is authorized against the provided token.
-     *
-     * @param request
-     * @param apiToken
-     * @return
-     * @throws AuthenticationException
-     */
-    public static boolean verifyBasicAuth(@NotNull final HttpRequest request, @NotNull final String apiToken)
-            throws AuthenticationException {
-        Header authHeader = request.getFirstHeader(HttpHeaders.AUTHORIZATION);
-        if (authHeader != null) {
-            String[] tokens = authHeader.getValue().split("\\s");
-            if (tokens.length == 2) {
-                if ("Basic".equals(tokens[0])) {
-                    return apiToken.equals(tokens[1]);
-                } else {
-                    throw new AuthenticationException("Only 'Basic' authorization is supported");
-                }
-            } else {
-                throw new AuthenticationException("Invalid Authorization header");
-            }
-        } else {
-            throw new AuthenticationException("No Authorization header found");
-        }
     }
 
     /**

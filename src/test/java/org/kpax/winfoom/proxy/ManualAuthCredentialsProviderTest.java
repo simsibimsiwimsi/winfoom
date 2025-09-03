@@ -31,7 +31,7 @@ class ManualAuthCredentialsProviderTest {
 
     @Test
     void getCredentials_isNtlm_returnsNTCredentials() {
-        when(proxyConfig.isNtlm()).thenReturn(true);
+        when(proxyConfig.isNtlm()).thenReturn(Boolean.valueOf(true));
         when(proxyConfig.getProxyUsername()).thenReturn("username");
         Credentials actualCredentials = underTest.getCredentials(AuthScope.ANY);
         assertThat(actualCredentials).isInstanceOf(NTCredentials.class);
@@ -39,7 +39,7 @@ class ManualAuthCredentialsProviderTest {
 
     @Test
     void getCredentials_nonNtlm_returnsUsernamePasswordCredentials() {
-        when(proxyConfig.isNtlm()).thenReturn(false);
+        when(proxyConfig.isNtlm()).thenReturn(Boolean.valueOf(false));
         when(proxyConfig.getProxyUsername()).thenReturn("username");
         Credentials actualCredentials = underTest.getCredentials(AuthScope.ANY);
         assertThat(actualCredentials).isInstanceOf(UsernamePasswordCredentials.class);
@@ -47,7 +47,7 @@ class ManualAuthCredentialsProviderTest {
 
     @Test
     void clear() {
-        when(proxyConfig.isNtlm()).thenReturn(true);
+        when(proxyConfig.isNtlm()).thenReturn(Boolean.valueOf(true));
         when(proxyConfig.getProxyUsername()).thenReturn("username");
         Credentials existentCredentials = underTest.getCredentials(AuthScope.ANY);
         underTest.clear();
