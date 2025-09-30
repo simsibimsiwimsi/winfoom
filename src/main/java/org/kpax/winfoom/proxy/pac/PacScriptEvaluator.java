@@ -186,12 +186,30 @@ public class PacScriptEvaluator implements ProxyListener {
      * @throws IOException
      */
     private String loadScript() throws IOException, URISyntaxException {
+
         URL url = proxyConfig.getProxyPacFileLocationAsURL();
         Assert.state(url != null, "No proxy PAC file location found");
         log.info("Get PAC file from: {}", url);
+
         try (InputStream inputStream = url.openStream()) {
             String content = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
             log.info("PAC content: {}", content);
+            return content;
+        } catch (IOException e) {
+            log.warn("Error loading primary PAC file from: {}. Attempting fallback now..", url, e);
+            return this.loadFallbackScript();
+        }
+    }
+
+    private String loadFallbackScript() throws IOException, URISyntaxException {
+
+        URL fallbackUrl = proxyConfig.getProxyPacFileFallbackLocationAsURL();
+        Assert.state(fallbackUrl != null, "No proxy PAC file fallback location found");
+        log.info("Get fallback PAC file from: {}", fallbackUrl);
+
+        try (InputStream inputStream = fallbackUrl.openStream()) {
+            String content = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
+            log.info("Fallback PAC content: {}", content);
             return content;
         }
     }

@@ -157,6 +157,10 @@ public class ProxyConfig {
     private String proxyPacFileLocation;
 
     @Setter
+    @Value("${proxy.pac.fileFallbackLocation:#{null}}")
+    private String proxyPacFileFallbackLocation;
+
+    @Setter
     @Value("${blacklist.timeout:30}")// minutes
     private Integer blacklistTimeout;
 
@@ -488,11 +492,20 @@ public class ProxyConfig {
 
     public URL getProxyPacFileLocationAsURL() throws MalformedURLException, URISyntaxException {
         log.info("proxyPacFileLocation: {}", proxyPacFileLocation);
-        if (StringUtils.isNotEmpty(proxyPacFileLocation)) {
-            if (HttpUtils.containsSchema(proxyPacFileLocation)) {
-                return new URI(proxyPacFileLocation).toURL();
+        return getLocationAsUrl(proxyPacFileLocation);
+    }
+
+    public URL getProxyPacFileFallbackLocationAsURL() throws MalformedURLException, URISyntaxException {
+        log.info("proxyPacFileFallbackLocation: {}", proxyPacFileFallbackLocation);
+        return getLocationAsUrl(proxyPacFileFallbackLocation);
+    }
+
+    private URL getLocationAsUrl(String location)  throws MalformedURLException, URISyntaxException {
+        if (StringUtils.isNotEmpty(location)) {
+            if (HttpUtils.containsSchema(location)) {
+                return new URI(location).toURL();
             } else {
-                return new URI("file:///" + proxyPacFileLocation).toURL();
+                return new URI("file:///" + location).toURL();
             }
         }
         return null;
