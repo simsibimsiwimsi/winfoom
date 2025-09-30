@@ -27,7 +27,7 @@
     </parent>
     <groupId>org.kpax</groupId>
     <artifactId>winfoom</artifactId>
-    <version>5.0.1</version>
+    <version>5.1.0</version>
 
     <name>winfoom</name>
     <url>https://github.com/simsibimsiwimsi/winfoom</url>
@@ -208,6 +208,7 @@
                 <configuration>
                     <buildArgs>
                         <arg>--initialize-at-build-time=ch.qos.logback,org.slf4j</arg>
+                        <arg>--enable-url-protocols=http</arg>
                     </buildArgs>
                 </configuration>
             </plugin>
@@ -228,6 +229,24 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>properties</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <argLine> -javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar</argLine>
+                </configuration>
             </plugin>
         </plugins>
     </build>
